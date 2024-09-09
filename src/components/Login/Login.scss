@@ -1,0 +1,37 @@
+.red {
+    border: 1px solid red;
+}
+
+.green {
+    border: 1px solid green;
+}
+
+.yellow {
+    border: 1px solid yellow;
+}
+
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // height: calc(100vh - 53.5px);
+    height: 100vh;
+    background-color: #f0f2f5;
+
+    .content-right {
+        background-color: #fff;
+        // border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+
+        .forgot-password {
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
