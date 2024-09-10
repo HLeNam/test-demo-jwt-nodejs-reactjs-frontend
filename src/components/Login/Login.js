@@ -1,14 +1,95 @@
 import "./Login.scss";
 
 import Register from "../Register/Register";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { loginUser } from "../../services/userService";
+
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const Login = (props) => {
+    const history = useHistory();
+
     const [isShowModal, setIsShowModal] = useState(false);
+
+    const [valueLogin, setValueLogin] = useState("");
+    const [password, setPassword] = useState("");
+
+    const defaultObjValidInput = {
+        isValidValueLogin: true,
+        isValidPassword: true,
+    };
+    const [objValidInput, setObjValidInput] = useState(defaultObjValidInput);
 
     const handleCreateNewAccount = () => {
         setIsShowModal(true);
     };
+
+    const handleLogin = async () => {
+        setObjValidInput(defaultObjValidInput);
+
+        if (!valueLogin) {
+            toast.error("Please your email address or phone number", {
+                theme: "colored",
+                position: "bottom-center",
+            });
+
+            setObjValidInput({
+                ...defaultObjValidInput,
+                isValidValueLogin: false,
+            });
+
+            return;
+        }
+
+        if (!password) {
+            toast.error("Please your password", {
+                theme: "colored",
+                position: "bottom-center",
+            });
+
+            setObjValidInput({
+                ...defaultObjValidInput,
+                isValidPassword: false,
+            });
+            return;
+        }
+
+        let response = await loginUser(valueLogin, password);
+
+        if (response && response.data && +response.data.EC === 0) {
+            let data = {
+                isAuthenticated: true,
+                token: "fake token",
+            };
+
+            sessionStorage.setItem("account", JSON.stringify(data));
+
+            // success
+            history.push("/users");
+            window.location.reload();
+        }
+        if (response && response.data && +response.data.EC !== 0) {
+            toast.error(response.data.EM, {
+                theme: "colored",
+                position: "bottom-center",
+            });
+        }
+    };
+
+    const handlePressEnter = (event) => {
+        if (event.charCode === 13 && event.code === "Enter") {
+            handleLogin();
+        }
+    };
+
+    useEffect(() => {
+        let session = sessionStorage.getItem("account");
+
+        if (session) {
+            history.push("/");
+        }
+    }, []);
 
     return (
         <>
@@ -30,15 +111,30 @@ const Login = (props) => {
                             <div className="row row-cols-1 g-3 p-3">
                                 <input
                                     type="email"
-                                    className="form-control"
+                                    className={
+                                        objValidInput.isValidValueLogin
+                                            ? "form-control"
+                                            : "form-control is-invalid"
+                                    }
                                     placeholder="Email address or phone number"
+                                    value={valueLogin}
+                                    onChange={(event) => setValueLogin(event.target.value)}
                                 />
                                 <input
                                     type="password"
-                                    className="form-control"
+                                    className={
+                                        objValidInput.isValidPassword
+                                            ? "form-control"
+                                            : "form-control is-invalid"
+                                    }
                                     placeholder="Password"
+                                    value={password}
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    onKeyPress={(event) => handlePressEnter(event)}
                                 />
-                                <button className="btn btn-primary">Login</button>
+                                <button className="btn btn-primary" onClick={() => handleLogin()}>
+                                    Login
+                                </button>
                                 <span className="text-center">
                                     <a href="#!" className="forgot-password">
                                         Forgot your password?

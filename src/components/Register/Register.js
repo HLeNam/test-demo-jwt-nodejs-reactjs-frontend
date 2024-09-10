@@ -4,8 +4,9 @@ import Modal from "react-bootstrap/Modal";
 
 import { toast } from "react-toastify";
 
-import axios from "axios";
 import { useEffect, useState } from "react";
+
+import { registerNewUser } from "../../services/userService";
 
 const Register = (props) => {
     const { show, setShow } = props;
@@ -88,21 +89,22 @@ const Register = (props) => {
         return true;
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         let check = isValidInputs();
-
+        const toastConfig = { theme: "colored", position: "bottom-center" };
         // let userDate = { email, phone, username, password };
 
         if (check === true) {
-            axios.post("http://localhost:8080/api/v1/register", {
-                email,
-                phone,
-                username,
-                password,
-            });
-        }
+            let response = await registerNewUser(email, phone, username, password);
+            let serverData = response.data;
 
-        handleClose();
+            if (+serverData.EC === 0) {
+                toast.success(serverData.EM, toastConfig);
+                handleClose();
+            } else {
+                toast.error(serverData.EM, toastConfig);
+            }
+        }
     };
 
     return (
